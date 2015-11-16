@@ -8,6 +8,8 @@ const uint64_t pipes[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
 const int pin = 7;
 char RecvPayload[31] = "";
 bool isOn = false;
+int offState = HIGH;
+int onState = LOW;
 
 void setup()
 {
@@ -24,6 +26,7 @@ void setup()
 	radio.printDetails();
 
 	pinMode(pin, OUTPUT);
+	digitalWrite(pin, offState);
 }
 
 void loop()
@@ -80,12 +83,12 @@ void nrfCreateResponse(char* message)
 		int len = radio.getDynamicPayloadSize();
 		if (isOn)
 		{
-			digitalWrite(pin, HIGH);
+			digitalWrite(pin, onState);
 			radio.write("1", len);
 		}
 		else
 		{
-			digitalWrite(pin, LOW);
+			digitalWrite(pin, offState);
 			radio.write("0", len);
 		}
 
