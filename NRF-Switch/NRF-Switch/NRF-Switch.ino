@@ -10,6 +10,7 @@ char RecvPayload[31] = "";
 bool isOn = false;
 int offState = HIGH;
 int onState = LOW;
+uint8_t payloadSize = 8;
 
 void setup()
 {
@@ -19,8 +20,8 @@ void setup()
 
 	radio.begin();
 	radio.setRetries(15, 15);
-	radio.enableDynamicPayloads();
 	radio.setPALevel(RF24_PA_MAX);
+	radio.setPayloadSize(payloadSize);
 	radio.setDataRate(RF24_250KBPS);
 	radio.openWritingPipe(pipes[0]);
 	radio.openReadingPipe(1, pipes[1]);
@@ -52,7 +53,7 @@ char* nrfReceive()
 
 		int len = 0;
 		while (radio.available()) {
-			len = radio.getDynamicPayloadSize();
+			len = payloadSize;
 			radio.read(&RecvPayload, len);
 			delay(100);
 		}
@@ -71,7 +72,7 @@ void nrfCreateResponse(char* message)
 {
 	if (message[0] == '1')
 	{
-		int len = radio.getDynamicPayloadSize();
+		int len = payloadSize;
 		if (isOn)
 			radio.write("1", len);
 		else
@@ -82,7 +83,7 @@ void nrfCreateResponse(char* message)
 	else if (message[0] == '2')
 	{
 		isOn = !isOn;
-		int len = radio.getDynamicPayloadSize();
+		int len = payloadSize;
 		if (isOn)
 		{
 			digitalWrite(pin, onState);
