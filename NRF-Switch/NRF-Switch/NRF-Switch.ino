@@ -20,6 +20,8 @@ void setup()
 	radio.begin();
 	radio.setRetries(15, 15);
 	radio.enableDynamicPayloads();
+	radio.setPALevel(RF24_PA_MAX);
+	radio.setDataRate(RF24_250KBPS);
 	radio.openWritingPipe(pipes[0]);
 	radio.openReadingPipe(1, pipes[1]);
 	radio.startListening();
