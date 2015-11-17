@@ -15,10 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Nrf.ino" />
+    <None Include="NRF-Switch.ino" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="__vm\.Nrf.vsarduino.h">
+    <ClInclude Include="__vm\.NRF-Switch.vsarduino.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
