@@ -6,11 +6,9 @@
 RF24 radio(9, 10);
 const uint64_t pipes[2] = { 0xF0F0F0F0E1LL, 0xF0F0F0F0D2LL };
 const int pin = 7;
-char RecvPayload[31] = "";
 bool isOn = false;
 int offState = HIGH;
 int onState = LOW;
-uint8_t payloadSize = 8;
 
 void setup()
 {
@@ -21,8 +19,8 @@ void setup()
 	radio.begin();
 	radio.setRetries(15, 15);
 	radio.setPALevel(RF24_PA_MAX);
-	radio.setPayloadSize(payloadSize);
-	radio.setDataRate(RF24_250KBPS);
+	radio.enableDynamicPayloads();
+	radio.setDataRate(RF24_2MBPS);
 	radio.openWritingPipe(pipes[0]);
 	radio.openReadingPipe(1, pipes[1]);
 	radio.startListening();
@@ -38,31 +36,27 @@ void loop()
 	if (received != NULL)
 	{
 		radio.stopListening();
-
 		nrfCreateResponse(received);
-
 		radio.startListening();
 	}
+
+	delay(50);
 }
 
 char* nrfReceive()
 {
-	if (radio.available())
-	{
-		printf("Waiting for message.\n\r");
+	if (radio.available()) {
+		printf("Got message.\n\r");
+		char RecvPayload[31] = "";
 
-		int len = 0;
-		while (radio.available()) {
-			len = payloadSize;
-			radio.read(&RecvPayload, len);
-			delay(100);
-		}
-		char* received = RecvPayload;
+		int len = radio.getDynamicPayloadSize();
+		radio.read(&RecvPayload, len);
+
 		printf("Received: ");
-		printf(received);
+		printf(RecvPayload);
 		printf("\r\n");
-		RecvPayload[len] = 0; // null terminate string
-		return received;
+
+		return RecvPayload;
 	}
 
 	return NULL;
@@ -72,27 +66,27 @@ void nrfCreateResponse(char* message)
 {
 	if (message[0] == '1')
 	{
-		int len = payloadSize;
+		int len = radio.getPayloadSize();
 		if (isOn)
-			radio.write("1", len);
+			radio.write("1", 1);
 		else
-			radio.write("0", len);
+			radio.write("0", 1);
 
 		printf("Sent response.\n\r");
 	}
 	else if (message[0] == '2')
 	{
-		isOn = !isOn;
-		int len = payloadSize;
+		isOn = message[1] == '0' ? false : true;
+		int len = radio.getPayloadSize();
 		if (isOn)
 		{
 			digitalWrite(pin, onState);
-			radio.write("1", len);
+			radio.write("1", 1);
 		}
 		else
 		{
 			digitalWrite(pin, offState);
-			radio.write("0", len);
+			radio.write("0", 1);
 		}
 
 		printf("Changed status and sent response.\n\r");
